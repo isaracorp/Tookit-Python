@@ -7,7 +7,7 @@ responsibly disclose your findings, and will make every effort to acknowledge
 your contributions.
 
 To report a security issue, email
-[security@isara.com](mailto:security@isara.com?subject=SECURITY)and include the
+[security@isara.com](mailto:security@isara.com?subject=SECURITY) and include the
 word "SECURITY" in the subject line.
 
 The ISARA team will send a response indicating the next steps in handling your
