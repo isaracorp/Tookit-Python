@@ -35,12 +35,6 @@ class iqr_ChaCha20:
     IQR_CHACHA20_KEY_SIZE = 32  # ChaCha20 keys must be exactly 32 bytes.
     IQR_CHACHA20_NONCE_SIZE = 12  # The nonce for ChaCha20 must be exactly 12 bytes.
 
-    # IQR_API
-    # iqr_retval iqr_ChaCha20Encrypt(const uint8_t *key, size_t key_size,
-    #                                const uint8_t *nonce, size_t nonce_size,
-    #                                uint32_t counter,
-    #                                const uint8_t *plaintext, size_t plaintext_size,
-    #                                uint8_t *ciphertext, size_t ciphertext_size);
     _iqr_toolkit.iqr_ChaCha20Encrypt.argtypes = [ctypes.c_char_p, ctypes.c_size_t,  # key
                                                  ctypes.c_char_p, ctypes.c_size_t,  # nonce
                                                  ctypes.c_uint32,  # counter
@@ -138,3 +132,55 @@ class iqr_retval:
         ''' Return a string representation of the given iqr_retval value.
         '''
         return _iqr_toolkit.iqr_StrError(error_value).decode('utf-8')
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------
+# Toolkit return values: iqr_version.h
+# ----------------------------------------------------------------------------------------------------------------------------------
+class iqr_Version:
+    ''' ISARA toolkit version information.
+    '''
+
+    IQR_VERSION_MAJOR = 2  # Major version number.
+    IQR_VERSION_MINOR = 1  # Minor version number.
+
+    IQR_VERSION_STRING = "ISARA Radiate Quantum-Safe Library 2.1"
+
+    _iqr_toolkit.iqr_VersionCheck.argtypes = [ctypes.c_uint32, ctypes.c_uint32]
+    _iqr_toolkit.iqr_VersionCheck.restype = ctypes.c_uint64
+
+    _iqr_toolkit.iqr_VersionGetBuildTarget.argtypes = [ctypes.POINTER(ctypes.c_char_p)]
+    _iqr_toolkit.iqr_VersionGetBuildTarget.restype = ctypes.c_uint64
+
+    _iqr_toolkit.iqr_VersionGetBuildHash.argtypes = [ctypes.POINTER(ctypes.c_char_p)]
+    _iqr_toolkit.iqr_VersionGetBuildHash.restype = ctypes.c_uint64
+
+    @staticmethod
+    def Check(major_version, minor_version):
+        ''' Does the library's version match major_version.minor_version?
+        '''
+        return _iqr_toolkit.iqr_VersionCheck(major_version, minor_version)
+
+    @staticmethod
+    def GetBuildTarget():
+        ''' Get the library build information.
+        '''
+        target = ctypes.c_char_p(0)  # NULL
+        retval = _iqr_toolkit.iqr_VersionGetBuildTarget(ctypes.byref(target))
+
+        if retval != iqr_retval.IQR_OK:
+            raise RuntimeError('iqr_VersionGetBuildTarget() failed: {0}'.format(iqr_retval.StrError(retval)))
+
+        return target.value.decode('utf-8')
+
+    @staticmethod
+    def GetBuildHash():
+        ''' Get the library build hash.
+        '''
+        build = ctypes.c_char_p(0)  # NULL
+        retval = _iqr_toolkit.iqr_VersionGetBuildHash(ctypes.byref(build))
+
+        if retval != iqr_retval.IQR_OK:
+            raise RuntimeError('iqr_VersionGetBuildHash() failed: {0}'.format(iqr_retval.StrError(retval)))
+
+        return build.value.decode('utf-8')
