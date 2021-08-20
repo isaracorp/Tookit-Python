@@ -119,6 +119,7 @@ class Retval:
     IQR_EPTROVERLAP = -1013  # Input and output pointers must not be overlapping buffers.
     IQR_ELIBRARYMISMATCH = -1014  # Library version does not match header version.
     IQR_EINVSTRATEGY = -1015  # The chosen tree strategy cannot be used for this function.
+    IQR_EVERSIONMISMATCH = -1016  # The object version does not match the library version.
 
     # Algorithm error values.
     IQR_EINVALGOSTATE = -2001  # The algorithm state is invalid.
@@ -131,7 +132,6 @@ class Retval:
     IQR_EKEYPAIRMISMATCH = -3004  # The public key is not derived from the private key.
     IQR_EINVSIGNATURE = -3006  # The signature of the message is invalid.
     IQR_ESTATEDEPLETED = -3007  # The state cannot be used to create more signatures.
-    IQR_ESTATECORRUPTED = -3008  # An error occurred while updating the state. It is corrupted and cannot be used.
 
     # Random Number Generator error values.
     IQR_ENOTSEEDED = -4001  # The Random Number Generator has not been seeded.
@@ -163,7 +163,7 @@ class Version:
     IQR_VERSION_STRING = "ISARA Radiate Quantum-Safe Library 3.0"
 
     _iqr_toolkit.iqr_VersionCheck.argtypes = [ctypes.c_uint32, ctypes.c_uint32]
-    _iqr_toolkit.iqr_VersionCheck.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_VersionCheck.restype = ctypes.c_int32
 
     _iqr_toolkit.iqr_VersionGetBuildTarget.argtypes = [ctypes.POINTER(ctypes.c_char_p)]
     _iqr_toolkit.iqr_VersionGetBuildTarget.restype = ctypes.c_uint64
