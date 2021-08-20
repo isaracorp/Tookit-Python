@@ -51,12 +51,12 @@ class ChaCha20:
     IQR_CHACHA20_KEY_SIZE = 32  # ChaCha20 keys must be exactly 32 bytes.
     IQR_CHACHA20_NONCE_SIZE = 12  # The nonce for ChaCha20 must be exactly 12 bytes.
 
-    _iqr_toolkit.iqr_ChaCha20Encrypt.argtypes = [ctypes.c_char_p, ctypes.c_size_t,  # key
-                                                 ctypes.c_char_p, ctypes.c_size_t,  # nonce
+    _iqr_toolkit.iqr_ChaCha20Encrypt.argtypes = [ctypes.c_void_p, ctypes.c_size_t,  # key
+                                                 ctypes.c_void_p, ctypes.c_size_t,  # nonce
                                                  ctypes.c_uint32,  # counter
-                                                 ctypes.c_char_p, ctypes.c_size_t,  # plaintext
-                                                 ctypes.c_char_p, ctypes.c_size_t]  # ciphertext
-    _iqr_toolkit.iqr_ChaCha20Encrypt.restype = ctypes.c_uint64
+                                                 ctypes.c_void_p, ctypes.c_size_t,  # plaintext
+                                                 ctypes.c_void_p, ctypes.c_size_t]  # ciphertext
+    _iqr_toolkit.iqr_ChaCha20Encrypt.restype = ctypes.c_int64
 
     @staticmethod
     def Encrypt(key, nonce, counter, plaintext):
@@ -83,7 +83,7 @@ class ChaCha20:
 
         Returns plaintext.
         '''
-        return iqr_ChaCha20.Encrypt(key, nonce, counter, ciphertext)
+        return ChaCha20.Encrypt(key, nonce, counter, ciphertext)
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
@@ -140,7 +140,7 @@ class Retval:
     # Crypto error values.
     IQR_EDECRYPTIONFAILED = -5001  # The decryption algorithm failed to decrypt the ciphertext.
 
-    _iqr_toolkit.iqr_StrError.argtypes = [ctypes.c_size_t]
+    _iqr_toolkit.iqr_StrError.argtypes = [ctypes.c_int64]
     _iqr_toolkit.iqr_StrError.restype = ctypes.c_char_p
 
     @staticmethod
@@ -200,3 +200,17 @@ class Version:
             raise RuntimeError('iqr_VersionGetBuildHash() failed: {0}'.format(Retval.StrError(retval)))
 
         return build.value.decode('utf-8')
+
+
+if __name__ == '__main__':
+    # Run me via python3 iqr_toolkit.py
+    print(Version.IQR_VERSION_STRING)
+    print('Build target: {0}'.format(Version.GetBuildTarget()))
+    print('Build hash: {0}'.format(Version.GetBuildHash()))
+
+    # Absolutely do not ever create a key and nonce like this.
+    chacha_key = b'#' * ChaCha20.IQR_CHACHA20_KEY_SIZE
+    chacha_nonce = b'*' * ChaCha20.IQR_CHACHA20_NONCE_SIZE
+    chacha_msg = b'ChaCha20 is working.'
+    chacha_encrypted = ChaCha20.Encrypt(chacha_key, chacha_nonce, 1, chacha_msg)
+    print('{0}'.format(ChaCha20.Decrypt(chacha_key, chacha_nonce, 1, chacha_encrypted)))
