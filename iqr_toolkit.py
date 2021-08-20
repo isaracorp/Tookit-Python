@@ -71,7 +71,6 @@ class ChaCha20:
                                                   counter,
                                                   plaintext, len(plaintext),
                                                   cipher, ctypes.sizeof(cipher))
-
         if retval != Retval.IQR_OK:
             raise RuntimeError('iqr_ChaCha20Encrypt() failed: {0}'.format(Retval.StrError(retval)))
 
@@ -86,6 +85,17 @@ class ChaCha20:
         return ChaCha20.Encrypt(key, nonce, counter, ciphertext)
 
 
+def test_chacha20():
+    ''' Run a simple ChaCha20 test.
+    '''
+    # Absolutely do not ever create a key and nonce like this.
+    chacha_key = b'#' * ChaCha20.IQR_CHACHA20_KEY_SIZE
+    chacha_nonce = b'*' * ChaCha20.IQR_CHACHA20_NONCE_SIZE
+    chacha_msg = b'ChaCha20 is working.'
+    chacha_encrypted = ChaCha20.Encrypt(chacha_key, chacha_nonce, 1, chacha_msg)
+    print('{0}'.format(ChaCha20.Decrypt(chacha_key, chacha_nonce, 1, chacha_encrypted)))
+
+
 # ----------------------------------------------------------------------------------------------------------------------------------
 # Toolkit Context: iqr_context.h
 # ----------------------------------------------------------------------------------------------------------------------------------
@@ -93,10 +103,10 @@ class Context:
     ''' Toolkit Context object.
     '''
 
-    _iqr_toolkit.iqr_CreateContext.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_CreateContext.argtypes = [ctypes.POINTER(ctypes.c_void_p)]  # Context
     _iqr_toolkit.iqr_CreateContext.restype = ctypes.c_int64
 
-    _iqr_toolkit.iqr_DestroyContext.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_DestroyContext.argtypes = [ctypes.POINTER(ctypes.c_void_p)]  # Context
     _iqr_toolkit.iqr_DestroyContext.restype = ctypes.c_int64
 
     @staticmethod
@@ -108,7 +118,6 @@ class Context:
         ctx = ctypes.c_void_p(0)
 
         retval = _iqr_toolkit.iqr_CreateContext(ctypes.byref(ctx))
-
         if retval != Retval.IQR_OK:
             raise RuntimeError('iqr_CreateContext() failed: {0}'.format(Retval.StrError(retval)))
 
@@ -119,9 +128,294 @@ class Context:
         ''' Clear and deallocate a Context object.
         '''
         retval = _iqr_toolkit.iqr_DestroyContext(ctypes.byref(ctx))
-
         if retval != Retval.IQR_OK:
             raise RuntimeError('iqr_DestroyContext() failed: {0}'.format(Retval.StrError(retval)))
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------
+# Classic McEliece KEM: iqr_classicmceliece.h
+# ----------------------------------------------------------------------------------------------------------------------------------
+class ClassicMcEliece:
+    ''' Classic McEliece KEM.
+    '''
+
+    IQR_CLASSICMCELIECE_SHARED_KEY_SIZE = 32  # The size of the shared key produced by ClassicMcEliece in bytes.
+
+    IQR_CLASSICMCELIECE_6 = _iqr_toolkit.IQR_CLASSICMCELIECE_6  # 6960119 variant (256 bit classical security).
+    IQR_CLASSICMCELIECE_8 = _iqr_toolkit.IQR_CLASSICMCELIECE_8  # 8192128 variant (256 bit classical security).
+
+    _iqr_toolkit.iqr_ClassicMcElieceCreateParams.argtypes = [ctypes.c_void_p,  # Context
+                                                             ctypes.c_void_p,  # RNG
+                                                             ctypes.POINTER(ctypes.c_void_p)]  # params
+    _iqr_toolkit.iqr_ClassicMcElieceCreateParams.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_ClassicMcElieceDestroyParams.argtypes = [ctypes.POINTER(ctypes.c_void_p)]  # params
+    _iqr_toolkit.iqr_ClassicMcElieceDestroyParams.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_ClassicMcElieceGetPublicKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_ClassicMcElieceGetPublicKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_ClassicMcElieceGetPrivateKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_ClassicMcElieceGetPrivateKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_ClassicMcElieceGetCiphertextSize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_ClassicMcElieceGetCiphertextSize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_ClassicMcElieceGetSharedKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_ClassicMcElieceGetSharedKeySize.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_ClassicMcElieceCreateKeyPair.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
+                                                              ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_ClassicMcElieceCreateKeyPair.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_ClassicMcElieceDestroyPublicKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_ClassicMcElieceDestroyPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_ClassicMcElieceDestroyPrivateKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_ClassicMcElieceDestroyPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_ClassicMcElieceExportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_ClassicMcElieceExportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_ClassicMcElieceExportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_ClassicMcElieceExportPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_ClassicMcElieceImportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                                ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_ClassicMcElieceImportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_ClassicMcElieceImportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                                 ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_ClassicMcElieceImportPrivateKey.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_ClassicMcElieceEncapsulate.argtypes = [ctypes.c_void_p,  # Public Key
+                                                            ctypes.c_void_p,  # RNG
+                                                            ctypes.c_void_p, ctypes.c_size_t,  # Ciphertext
+                                                            ctypes.c_void_p, ctypes.c_size_t]  # Shared Key
+    _iqr_toolkit.iqr_ClassicMcElieceEncapsulate.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_ClassicMcElieceDecapsulate.argtypes = [ctypes.c_void_p,  # Private Key
+                                                            ctypes.c_void_p, ctypes.c_size_t,  # Ciphertext
+                                                            ctypes.c_void_p, ctypes.c_size_t]  # Shared Key
+    _iqr_toolkit.iqr_ClassicMcElieceDecapsulate.restype = ctypes.c_int64
+
+    @staticmethod
+    def CreateParams(ctx, variant):
+        ''' Create a parameter object for the ClassicMcEliece cryptographic system.
+        '''
+        params = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_ClassicMcElieceCreateParams(ctx, variant, ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceCreateParams() failed: {0}'.format(Retval.StrError(retval)))
+
+        return params
+
+    @staticmethod
+    def DestroyParams(params):
+        ''' Clear and deallocate a ClassicMcEliece parameter object.
+        '''
+        retval = _iqr_toolkit.iqr_ClassicMcElieceDestroyParams(ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceDestroyParams() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def CreateKeyPair(params, rng):
+        pub_key = ctypes.c_void_p(0)
+        priv_key = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_ClassicMcElieceCreateKeyPair(params, rng, ctypes.byref(pub_key), ctypes.byref(priv_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceCreateKeyPair() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_key, priv_key
+
+    @staticmethod
+    def DestroyPublicKey(pub_key):
+        ''' Clear and deallocate a ClassicMcEliece public key object.
+        '''
+        retval = _iqr_toolkit.iqr_ClassicMcElieceDestroyPublicKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceDestroyPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def DestroyPrivateKey(pub_key):
+        ''' Clear and deallocate a ClassicMcEliece private object.
+        '''
+        retval = _iqr_toolkit.iqr_ClassicMcElieceDestroyPrivateKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceDestroyPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def ExportPublicKey(params, pub_key):
+        ''' Export a ClassicMcEliece public key object to bytes.
+        '''
+        pub_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_ClassicMcElieceGetPublicKeySize(params, ctypes.byref(pub_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceGetPublicKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        pub_data = ctypes.create_string_buffer(pub_size.value)
+
+        retval = _iqr_toolkit.iqr_ClassicMcElieceExportPublicKey(pub_key, pub_data, pub_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceExportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_data.raw
+
+    @staticmethod
+    def ExportPrivateKey(params, priv_key):
+        ''' Export a ClassicMcEliece private key object to bytes.
+        '''
+        priv_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_ClassicMcElieceGetPrivateKeySize(params, ctypes.byref(priv_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceGetPrivateKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        priv_data = ctypes.create_string_buffer(priv_size.value)
+
+        retval = _iqr_toolkit.iqr_ClassicMcElieceExportPrivateKey(priv_key, priv_data, priv_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceExportPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv_data.raw
+
+    @staticmethod
+    def ImportPublicKey(params, pub_data):
+        ''' Import a ClassicMcEliece public key from bytes.
+        '''
+        pub = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_ClassicMcElieceImportPublicKey(params, pub_data, len(pub_data), ctypes.byref(pub))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub
+
+    @staticmethod
+    def ImportPrivateKey(params, priv_data):
+        ''' Import a ClassicMcEliece private key from bytes.
+        '''
+        priv = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_ClassicMcElieceImportPrivateKey(params, priv_data, len(priv_data), ctypes.byref(priv))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv
+
+    @staticmethod
+    def Encapsulate(params, pub, rng):
+        ''' Create a ciphertext and shared key from the public key.
+        '''
+        ciphertext_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_ClassicMcElieceGetCiphertextSize(params, ctypes.byref(ciphertext_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceGetCiphertextSize() failed: {0}'.format(Retval.StrError(retval)))
+        shared_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_ClassicMcElieceGetSharedKeySize(params, ctypes.byref(shared_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceGetSharedKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        ciphertext = ctypes.create_string_buffer(ciphertext_size.value)
+        shared = ctypes.create_string_buffer(shared_size.value)
+
+        retval = _iqr_toolkit.iqr_ClassicMcElieceEncapsulate(pub, rng, ciphertext, ciphertext_size, shared, shared_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceEncapsulate() failed: {0}'.format(Retval.StrError(retval)))
+
+        return ciphertext.raw, shared.raw
+
+    @staticmethod
+    def Decapsulate(params, priv, ciphertext):
+        ''' Extract the shared key from a private key and ciphertext.
+        '''
+        shared_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_ClassicMcElieceGetSharedKeySize(params, ctypes.byref(shared_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceGetSharedKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        shared = ctypes.create_string_buffer(shared_size.value)
+
+        retval = _iqr_toolkit.iqr_ClassicMcElieceDecapsulate(priv, ciphertext, len(ciphertext), shared, shared_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceDecapsulate() failed: {0}'.format(Retval.StrError(retval)))
+
+        return shared.raw
+
+
+def test_classicmceliece():
+    ''' Run a simple ClassicMcEliece test.
+    '''
+    ctx = Context.Create()
+
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA2_256, Hash.IQR_HASH_DEFAULT_SHA2_256)
+
+    rng = Rng.CreateHMACDRBG(ctx, Hash.IQR_HASHALGO_SHA2_256)
+    Rng.Initialize(rng, b'this is really bad seed data, never do this')
+
+    params = ClassicMcEliece.CreateParams(ctx, ClassicMcEliece.IQR_CLASSICMCELIECE_6)
+    pub, priv = ClassicMcEliece.CreateKeyPair(params, rng)
+
+    ciphertext, shared = ClassicMcEliece.Encapsulate(params, pub, rng)
+    print('ClassicMcEliece Encapsulate: {0}'.format(shared))
+    shared2 = ClassicMcEliece.Decapsulate(params, priv, ciphertext)
+    print('ClassicMcEliece Decapsulate: {0}'.format(shared2))
+
+    assert(shared == shared2)
+
+    pub_data = ClassicMcEliece.ExportPublicKey(params, pub)
+    priv_data = ClassicMcEliece.ExportPrivateKey(params, priv)
+
+    pub2 = ClassicMcEliece.ImportPublicKey(params, pub_data)
+    priv2 = ClassicMcEliece.ImportPrivateKey(params, priv_data)
+
+    ClassicMcEliece.DestroyPublicKey(pub)
+    ClassicMcEliece.DestroyPrivateKey(priv)
+    ClassicMcEliece.DestroyPublicKey(pub2)
+    ClassicMcEliece.DestroyPrivateKey(priv2)
+    ClassicMcEliece.DestroyParams(params)
+
+    Rng.Destroy(rng)
+    Context.Destroy(ctx)
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------
+# Toolkit hash implementations: iqr_hash.h
+# ----------------------------------------------------------------------------------------------------------------------------------
+class Hash:
+    ''' Hash implementations.
+
+    TODO: Creating/using a Hash object is not currently supported.
+    '''
+
+    IQR_HASHALGO_SHA2_256 = 2  # SHA2-256 algorithm type identifier.
+    IQR_HASHALGO_SHA2_384 = 3  # SHA2-384 algorithm type identifier.
+    IQR_HASHALGO_SHA2_512 = 4  # SHA2-512 algorithm type identifier.
+    IQR_HASHALGO_SHA3_256 = 5  # SHA3-256 algorithm type identifier.
+    IQR_HASHALGO_SHA3_512 = 6  # SHA3-512 algorithm type identifier.
+
+    IQR_SHA2_256_DIGEST_SIZE = 32  # The size of a SHA2-256 digest in bytes.
+    IQR_SHA2_384_DIGEST_SIZE = 48  # The size of a SHA2-384 digest in bytes.
+    IQR_SHA2_512_DIGEST_SIZE = 64  # The size of a SHA2-512 digest in bytes.
+    IQR_SHA3_256_DIGEST_SIZE = 32  # The size of a SHA3-256 digest in bytes.
+    IQR_SHA3_512_DIGEST_SIZE = 64  # The size of a SHA3-512 digest in bytes.
+
+    IQR_HASH_DEFAULT_SHA2_256 = _iqr_toolkit.IQR_HASH_DEFAULT_SHA2_256  # Internal SHA2-256 implementation.
+    IQR_HASH_DEFAULT_SHA2_384 = _iqr_toolkit.IQR_HASH_DEFAULT_SHA2_384  # Internal SHA2-384 implementation.
+    IQR_HASH_DEFAULT_SHA2_512 = _iqr_toolkit.IQR_HASH_DEFAULT_SHA2_512  # Internal SHA2-512 implementation.
+    IQR_HASH_DEFAULT_SHA3_256 = _iqr_toolkit.IQR_HASH_DEFAULT_SHA3_256  # Internal SHA3-256 implementation.
+    IQR_HASH_DEFAULT_SHA3_512 = _iqr_toolkit.IQR_HASH_DEFAULT_SHA3_512  # Internal SHA3-512 implementation.
+
+    _iqr_toolkit.iqr_HashRegisterCallbacks.argtypes = [ctypes.c_void_p, ctypes.c_int64, ctypes.c_void_p]
+    _iqr_toolkit.iqr_HashRegisterCallbacks.restype = ctypes.c_int64
+
+    @staticmethod
+    def RegisterCallbacks(ctx, algo, callbacks):
+        retval = _iqr_toolkit.iqr_HashRegisterCallbacks(ctx, algo, callbacks)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_HashRegisterCallbacks() failed: {0}'.format(Retval.StrError(retval)))
+
+
+def test_hash():
+    ''' Run a simple Hash test.
+    '''
+    ctx = Context.Create()
+
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA2_256, Hash.IQR_HASH_DEFAULT_SHA2_256)
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA2_384, Hash.IQR_HASH_DEFAULT_SHA2_384)
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA2_512, Hash.IQR_HASH_DEFAULT_SHA2_512)
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA3_256, Hash.IQR_HASH_DEFAULT_SHA3_256)
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA3_512, Hash.IQR_HASH_DEFAULT_SHA3_512)
+
+    Context.Destroy(ctx)
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
@@ -189,6 +483,60 @@ class Retval:
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
+# Toolkit random number generators: iqr_rng.h
+# ----------------------------------------------------------------------------------------------------------------------------------
+class Rng:
+    ''' Toolkit random number generators.
+
+    TODO: Providing your own callbacks is not currently supported.
+    '''
+
+    _iqr_toolkit.iqr_RNGCreateHMACDRBG.argtypes = [ctypes.c_void_p, ctypes.c_int64, ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_RNGCreateHMACDRBG.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_RNGDestroy.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_RNGDestroy.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_RNGInitialize.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_RNGInitialize.restype = ctypes.c_int64
+
+    @staticmethod
+    def CreateHMACDRBG(ctx, hash_algo):
+        rng = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_RNGCreateHMACDRBG(ctx, hash_algo, ctypes.byref(rng))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_RNGCreateHMACDRBG() failed: {0}'.format(Retval.StrError(retval)))
+
+        return rng
+
+    @staticmethod
+    def Destroy(rng):
+        retval = _iqr_toolkit.iqr_RNGDestroy(ctypes.byref(rng))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_RNGDestroy() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def Initialize(rng, seed):
+        retval = _iqr_toolkit.iqr_RNGInitialize(rng, seed, len(seed))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_RNGInitialize() failed: {0}'.format(Retval.StrError(retval)))
+
+
+def test_rng():
+    ''' Run a simple RNG test.
+    '''
+    ctx = Context.Create()
+
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA2_256, Hash.IQR_HASH_DEFAULT_SHA2_256)
+
+    rng = Rng.CreateHMACDRBG(ctx, Hash.IQR_HASHALGO_SHA2_256)
+    Rng.Initialize(rng, b'this is really bad seed data, never do this')
+
+    Rng.Destroy(rng)
+    Context.Destroy(ctx)
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------
 # Toolkit return values: iqr_version.h
 # ----------------------------------------------------------------------------------------------------------------------------------
 class Version:
@@ -246,9 +594,7 @@ if __name__ == '__main__':
     print('Build target: {0}'.format(Version.GetBuildTarget()))
     print('Build hash: {0}'.format(Version.GetBuildHash()))
 
-    # Absolutely do not ever create a key and nonce like this.
-    chacha_key = b'#' * ChaCha20.IQR_CHACHA20_KEY_SIZE
-    chacha_nonce = b'*' * ChaCha20.IQR_CHACHA20_NONCE_SIZE
-    chacha_msg = b'ChaCha20 is working.'
-    chacha_encrypted = ChaCha20.Encrypt(chacha_key, chacha_nonce, 1, chacha_msg)
-    print('{0}'.format(ChaCha20.Decrypt(chacha_key, chacha_nonce, 1, chacha_encrypted)))
+    test_chacha20()
+    test_classicmceliece()
+    test_hash()
+    test_rng()
