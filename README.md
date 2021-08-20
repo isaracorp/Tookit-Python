@@ -1,4 +1,4 @@
-# Toolkit-Python
+# Radiate Toolkit (Python)
 
 A set of Python 3 bindings for ISARA's cryptographic toolkit.
 
@@ -12,7 +12,7 @@ project, as well as IETF-standard digital signature schemes
 ([HSS](https://tools.ietf.org/html/rfc8554) and
 [XMSS](https://tools.ietf.org/html/rfc8391)) and useful building blocks.
 
-These bindings let you use the toolkit from Python 3.
+These bindings let you use the toolkit 3.0 from Python 3.
 
 ## Security Issues
 
@@ -23,15 +23,15 @@ For information about reporting security issues, please read the
 
 You can read the toolkit documentation online at ISARA's website:
 
-* [Developer's Guide](https://www.isara.com/toolkit/2/doc/guide/guide.html)
-* [Library Reference](https://www.isara.com/toolkit/2/doc/library/index.html)
-* [README](https://www.isara.com/toolkit/2/README.html)
+* [Developer's Guide](https://www.isara.com/toolkit/3/doc/guide/guide.html)
+* [Library Reference](https://www.isara.com/toolkit/3/doc/library/index.html)
+* [README](https://www.isara.com/toolkit/3/README.html)
 
 ## License
 
 See the [`LICENSE`](LICENSE) file for details:
 
-> Copyright (C) 2020, ISARA Corporation
+> Copyright (C) 2020-2021, ISARA Corporation
 >
 > Licensed under the Apache License, Version 2.0 (the "License");
 > you may not use this file except in compliance with the License.

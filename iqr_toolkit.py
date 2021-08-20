@@ -5,6 +5,22 @@
 # https://github.com/isaracorp/Toolkit-Python
 #
 # Python 3 bindings for the ISARA toolkit.
+#
+# See the LICENSE file for details:
+#
+# Copyright (C) 2020-2021, ISARA Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  https://github.com/isaracorp/Toolkit-Python/blob/develop/LICENSE
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import ctypes
 import sys
@@ -20,15 +36,15 @@ elif sys.platform == 'windows':  # TODO: Check that.
 ctypes.cdll.LoadLibrary(_iqr_shared_library_name)
 _iqr_toolkit = ctypes.CDLL(_iqr_shared_library_name)
 
-if _iqr_toolkit.iqr_VersionCheck(2, 1) != 0:
-    raise RuntimeWarning('iqr_toolkit was expecting version 2.1.')
+if _iqr_toolkit.iqr_VersionCheck(3, 0) != 0:
+    raise RuntimeWarning('iqr_toolkit was expecting version 3.0.')
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
 # ChaCha20 symmetric cipher: iqr_chacha20.h
 # ----------------------------------------------------------------------------------------------------------------------------------
 
-class iqr_ChaCha20:
+class ChaCha20:
     ''' ChaCha20 symmetric cipher.
     '''
 
@@ -56,8 +72,8 @@ class iqr_ChaCha20:
                                                   plaintext, len(plaintext),
                                                   cipher, ctypes.sizeof(cipher))
 
-        if retval != iqr_retval.IQR_OK:
-            raise RuntimeError('iqr_ChaCha20Encrypt() failed: {0}'.format(iqr_retval.StrError(retval)))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ChaCha20Encrypt() failed: {0}'.format(Retval.StrError(retval)))
 
         return cipher.raw
 
@@ -73,7 +89,7 @@ class iqr_ChaCha20:
 # ----------------------------------------------------------------------------------------------------------------------------------
 # Toolkit return values: iqr_retval.h
 # ----------------------------------------------------------------------------------------------------------------------------------
-class iqr_retval:
+class Retval:
     ''' ISARA toolkit standard return values.
 
     For signature schemes, IQR_EINVDATA indicates a corrupted signature
@@ -137,17 +153,17 @@ class iqr_retval:
 # ----------------------------------------------------------------------------------------------------------------------------------
 # Toolkit return values: iqr_version.h
 # ----------------------------------------------------------------------------------------------------------------------------------
-class iqr_Version:
+class Version:
     ''' ISARA toolkit version information.
     '''
 
     IQR_VERSION_MAJOR = 2  # Major version number.
     IQR_VERSION_MINOR = 1  # Minor version number.
 
-    IQR_VERSION_STRING = "ISARA Radiate Quantum-Safe Library 2.1"
+    IQR_VERSION_STRING = "ISARA Radiate Quantum-Safe Library 3.0"
 
     _iqr_toolkit.iqr_VersionCheck.argtypes = [ctypes.c_uint32, ctypes.c_uint32]
-    _iqr_toolkit.iqr_VersionCheck.restype = ctypes.c_uint64
+    _iqr_toolkit.iqr_VersionCheck.restype = ctypes.c_int64
 
     _iqr_toolkit.iqr_VersionGetBuildTarget.argtypes = [ctypes.POINTER(ctypes.c_char_p)]
     _iqr_toolkit.iqr_VersionGetBuildTarget.restype = ctypes.c_uint64
@@ -168,8 +184,8 @@ class iqr_Version:
         target = ctypes.c_char_p(0)  # NULL
         retval = _iqr_toolkit.iqr_VersionGetBuildTarget(ctypes.byref(target))
 
-        if retval != iqr_retval.IQR_OK:
-            raise RuntimeError('iqr_VersionGetBuildTarget() failed: {0}'.format(iqr_retval.StrError(retval)))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_VersionGetBuildTarget() failed: {0}'.format(Retval.StrError(retval)))
 
         return target.value.decode('utf-8')
 
@@ -180,7 +196,7 @@ class iqr_Version:
         build = ctypes.c_char_p(0)  # NULL
         retval = _iqr_toolkit.iqr_VersionGetBuildHash(ctypes.byref(build))
 
-        if retval != iqr_retval.IQR_OK:
-            raise RuntimeError('iqr_VersionGetBuildHash() failed: {0}'.format(iqr_retval.StrError(retval)))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_VersionGetBuildHash() failed: {0}'.format(Retval.StrError(retval)))
 
         return build.value.decode('utf-8')
