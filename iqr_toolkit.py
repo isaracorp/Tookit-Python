@@ -43,7 +43,6 @@ if _iqr_toolkit.iqr_VersionCheck(3, 0) != 0:
 # ----------------------------------------------------------------------------------------------------------------------------------
 # ChaCha20 symmetric cipher: iqr_chacha20.h
 # ----------------------------------------------------------------------------------------------------------------------------------
-
 class ChaCha20:
     ''' ChaCha20 symmetric cipher.
     '''
@@ -51,6 +50,7 @@ class ChaCha20:
     IQR_CHACHA20_KEY_SIZE = 32  # ChaCha20 keys must be exactly 32 bytes.
     IQR_CHACHA20_NONCE_SIZE = 12  # The nonce for ChaCha20 must be exactly 12 bytes.
 
+    # Type hints for calling into the C library.
     _iqr_toolkit.iqr_ChaCha20Encrypt.argtypes = [ctypes.c_void_p, ctypes.c_size_t,  # key
                                                  ctypes.c_void_p, ctypes.c_size_t,  # nonce
                                                  ctypes.c_uint32,  # counter
@@ -103,6 +103,7 @@ class Context:
     ''' Toolkit Context object.
     '''
 
+    # Type hints for calling into the C library.
     _iqr_toolkit.iqr_CreateContext.argtypes = [ctypes.POINTER(ctypes.c_void_p)]  # Context
     _iqr_toolkit.iqr_CreateContext.restype = ctypes.c_int64
 
@@ -144,6 +145,7 @@ class ClassicMcEliece:
     IQR_CLASSICMCELIECE_6 = _iqr_toolkit.IQR_CLASSICMCELIECE_6  # 6960119 variant (256 bit classical security).
     IQR_CLASSICMCELIECE_8 = _iqr_toolkit.IQR_CLASSICMCELIECE_8  # 8192128 variant (256 bit classical security).
 
+    # Type hints for calling into the C library.
     _iqr_toolkit.iqr_ClassicMcElieceCreateParams.argtypes = [ctypes.c_void_p,  # Context
                                                              ctypes.c_void_p,  # RNG
                                                              ctypes.POINTER(ctypes.c_void_p)]  # params
@@ -368,6 +370,56 @@ def test_classicmceliece():
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
+# Toolkit Dilithium signatures: iqr_dilithium.h
+# ----------------------------------------------------------------------------------------------------------------------------------
+class Dilithium:
+    ''' Dilithium signature scheme.
+    '''
+
+    IQR_DILITHIUM_2 = _iqr_toolkit.IQR_DILITHIUM_2  # Low-security variant.
+    IQR_DILITHIUM_3 = _iqr_toolkit.IQR_DILITHIUM_3  # Medium-security variant.
+    IQR_DILITHIUM_5 = _iqr_toolkit.IQR_DILITHIUM_3  # High-security variant.
+
+    # Type hints for calling into the C library.
+    _iqr_toolkit.iqr_DilithiumCreateParams.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_DilithiumCreateParams.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_DilithiumDestroyParams.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_DilithiumDestroyParams.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_DilithiumCreateKeyPair.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p),
+                                                        ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_DilithiumCreateKeyPair.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_DilithiumImportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                          ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_DilithiumImportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_DilithiumImportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                           ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_DilithiumImportPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_DilithiumExportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_DilithiumExportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_DilithiumExportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_DilithiumExportPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_DilithiumDestroyPublicKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_DilithiumDestroyPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_DilithiumDestroyPrivateKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_DilithiumDestroyPrivateKey.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_DilithiumGetPublicKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_DilithiumGetPublicKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_DilithiumGetPrivateKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_DilithiumGetPrivateKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_DilithiumGetSignatureSize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_DilithiumGetSignatureSize.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_DilithiumSign.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                               ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_DilithiumSign.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_DilithiumVerify.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                 ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_DilithiumVerify.restype = ctypes.c_int64
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------
 # Toolkit hash implementations: iqr_hash.h
 # ----------------------------------------------------------------------------------------------------------------------------------
 class Hash:
@@ -394,6 +446,7 @@ class Hash:
     IQR_HASH_DEFAULT_SHA3_256 = _iqr_toolkit.IQR_HASH_DEFAULT_SHA3_256  # Internal SHA3-256 implementation.
     IQR_HASH_DEFAULT_SHA3_512 = _iqr_toolkit.IQR_HASH_DEFAULT_SHA3_512  # Internal SHA3-512 implementation.
 
+    # Type hints for calling into the C library.
     _iqr_toolkit.iqr_HashRegisterCallbacks.argtypes = [ctypes.c_void_p, ctypes.c_int64, ctypes.c_void_p]
     _iqr_toolkit.iqr_HashRegisterCallbacks.restype = ctypes.c_int64
 
@@ -472,6 +525,7 @@ class Retval:
     # Crypto error values.
     IQR_EDECRYPTIONFAILED = -5001  # The decryption algorithm failed to decrypt the ciphertext.
 
+    # Type hints for calling into the C library.
     _iqr_toolkit.iqr_StrError.argtypes = [ctypes.c_int64]
     _iqr_toolkit.iqr_StrError.restype = ctypes.c_char_p
 
@@ -491,6 +545,7 @@ class Rng:
     TODO: Providing your own callbacks is not currently supported.
     '''
 
+    # Type hints for calling into the C library.
     _iqr_toolkit.iqr_RNGCreateHMACDRBG.argtypes = [ctypes.c_void_p, ctypes.c_int64, ctypes.POINTER(ctypes.c_void_p)]
     _iqr_toolkit.iqr_RNGCreateHMACDRBG.restype = ctypes.c_int64
     _iqr_toolkit.iqr_RNGDestroy.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
@@ -548,6 +603,7 @@ class Version:
 
     IQR_VERSION_STRING = "ISARA Radiate Quantum-Safe Library 3.0"
 
+    # Type hints for calling into the C library.
     _iqr_toolkit.iqr_VersionCheck.argtypes = [ctypes.c_uint32, ctypes.c_uint32]
     _iqr_toolkit.iqr_VersionCheck.restype = ctypes.c_int32
 
@@ -594,7 +650,10 @@ if __name__ == '__main__':
     print('Build target: {0}'.format(Version.GetBuildTarget()))
     print('Build hash: {0}'.format(Version.GetBuildHash()))
 
+    # Building blocks. If these don't work, you're in trouble.
     test_chacha20()
-    test_classicmceliece()
     test_hash()
     test_rng()
+
+    # KEMs
+    test_classicmceliece()
