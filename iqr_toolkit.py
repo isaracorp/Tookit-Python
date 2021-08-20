@@ -87,6 +87,44 @@ class ChaCha20:
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
+# Toolkit Context: iqr_context.h
+# ----------------------------------------------------------------------------------------------------------------------------------
+class Context:
+    ''' Toolkit Context object.
+    '''
+
+    _iqr_toolkit.iqr_CreateContext.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_CreateContext.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_DestroyContext.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_DestroyContext.restype = ctypes.c_int64
+
+    @staticmethod
+    def Create():
+        ''' Create and initialize a Context object.
+
+        The caller must free the returned ctx using DestroyContext().
+        '''
+        ctx = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_CreateContext(ctypes.byref(ctx))
+
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_CreateContext() failed: {0}'.format(Retval.StrError(retval)))
+
+        return ctx
+
+    @staticmethod
+    def Destroy(ctx):
+        ''' Clear and deallocate a Context object.
+        '''
+        retval = _iqr_toolkit.iqr_DestroyContext(ctypes.byref(ctx))
+
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DestroyContext() failed: {0}'.format(Retval.StrError(retval)))
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------
 # Toolkit return values: iqr_retval.h
 # ----------------------------------------------------------------------------------------------------------------------------------
 class Retval:
