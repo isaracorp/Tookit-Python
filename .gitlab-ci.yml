@@ -1,0 +1,15 @@
+# Lint the Python toolkit wrapper.
+
+stages:
+  - lint
+
+##
+## Linters
+##
+
+lint-pycodestyle:
+  stage: lint
+  tags:
+    - lint
+  script:
+    - find . -name \*.py | xargs pycodestyle --max-line-length=132
