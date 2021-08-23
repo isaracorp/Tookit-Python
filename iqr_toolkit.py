@@ -1710,6 +1710,242 @@ def test_Saber():
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
+# SIKE KEM: iqr_sike.h
+# ----------------------------------------------------------------------------------------------------------------------------------
+class SIKE:
+    ''' SIKE KEM.
+    '''
+
+    IQR_SIKE_P434 = _iqr_toolkit.IQR_SIKE_P434
+    IQR_SIKE_P503 = _iqr_toolkit.IQR_SIKE_P503
+    IQR_SIKE_P610 = _iqr_toolkit.IQR_SIKE_P610
+    IQR_SIKE_P751 = _iqr_toolkit.IQR_SIKE_P751
+
+    # Type hints for calling into the C library.
+    _iqr_toolkit.iqr_SIKECreateParams.argtypes = [ctypes.c_void_p,  # Context
+                                                  ctypes.c_void_p,  # RNG
+                                                  ctypes.POINTER(ctypes.c_void_p)]  # params
+    _iqr_toolkit.iqr_SIKECreateParams.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SIKEDestroyParams.argtypes = [ctypes.POINTER(ctypes.c_void_p)]  # params
+    _iqr_toolkit.iqr_SIKEDestroyParams.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_SIKEGetPublicKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_SIKEGetPublicKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SIKEGetPrivateKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_SIKEGetPrivateKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SIKEGetCiphertextSize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_SIKEGetCiphertextSize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SIKEGetSharedKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_SIKEGetSharedKeySize.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_SIKECreateKeyPair.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
+                                                   ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SIKECreateKeyPair.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SIKEDestroyPublicKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SIKEDestroyPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SIKEDestroyPrivateKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SIKEDestroyPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SIKEExportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_SIKEExportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SIKEExportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_SIKEExportPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SIKEImportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                     ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SIKEImportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SIKEImportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                      ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SIKEImportPrivateKey.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_SIKEEncapsulate.argtypes = [ctypes.c_void_p,  # Public Key
+                                                 ctypes.c_void_p,  # RNG
+                                                 ctypes.c_void_p, ctypes.c_size_t,  # Ciphertext
+                                                 ctypes.c_void_p, ctypes.c_size_t]  # Shared Key
+    _iqr_toolkit.iqr_SIKEEncapsulate.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SIKEDecapsulate.argtypes = [ctypes.c_void_p,  # Private Key
+                                                 ctypes.c_void_p, ctypes.c_size_t,  # Ciphertext
+                                                 ctypes.c_void_p, ctypes.c_size_t]  # Shared Key
+    _iqr_toolkit.iqr_SIKEDecapsulate.restype = ctypes.c_int64
+
+    @staticmethod
+    def CreateParams(ctx, variant):
+        ''' Create a parameter object for the SIKE cryptographic system.
+        '''
+        params = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_SIKECreateParams(ctx, variant, ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKECreateParams() failed: {0}'.format(Retval.StrError(retval)))
+
+        return params
+
+    @staticmethod
+    def DestroyParams(params):
+        ''' Clear and deallocate a SIKE parameter object.
+        '''
+        retval = _iqr_toolkit.iqr_SIKEDestroyParams(ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEDestroyParams() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def CreateKeyPair(params, rng):
+        pub_key = ctypes.c_void_p(0)
+        priv_key = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_SIKECreateKeyPair(params, rng, ctypes.byref(pub_key), ctypes.byref(priv_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKECreateKeyPair() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_key, priv_key
+
+    @staticmethod
+    def DestroyPublicKey(pub_key):
+        ''' Clear and deallocate a SIKE public key object.
+        '''
+        retval = _iqr_toolkit.iqr_SIKEDestroyPublicKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEDestroyPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def DestroyPrivateKey(pub_key):
+        ''' Clear and deallocate a SIKE private object.
+        '''
+        retval = _iqr_toolkit.iqr_SIKEDestroyPrivateKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEDestroyPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def ExportPublicKey(params, pub_key):
+        ''' Export a SIKE public key object to bytes.
+        '''
+        pub_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_SIKEGetPublicKeySize(params, ctypes.byref(pub_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEGetPublicKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        pub_data = ctypes.create_string_buffer(pub_size.value)
+
+        retval = _iqr_toolkit.iqr_SIKEExportPublicKey(pub_key, pub_data, pub_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEExportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_data.raw
+
+    @staticmethod
+    def ExportPrivateKey(params, priv_key):
+        ''' Export a SIKE private key object to bytes.
+        '''
+        priv_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_SIKEGetPrivateKeySize(params, ctypes.byref(priv_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEGetPrivateKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        priv_data = ctypes.create_string_buffer(priv_size.value)
+
+        retval = _iqr_toolkit.iqr_SIKEExportPrivateKey(priv_key, priv_data, priv_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEExportPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv_data.raw
+
+    @staticmethod
+    def ImportPublicKey(params, pub_data):
+        ''' Import a SIKE public key from bytes.
+        '''
+        pub = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_SIKEImportPublicKey(params, pub_data, len(pub_data), ctypes.byref(pub))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub
+
+    @staticmethod
+    def ImportPrivateKey(params, priv_data):
+        ''' Import a SIKE private key from bytes.
+        '''
+        priv = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_SIKEImportPrivateKey(params, priv_data, len(priv_data), ctypes.byref(priv))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv
+
+    @staticmethod
+    def Encapsulate(params, pub, rng):
+        ''' Create a ciphertext and shared key from the public key.
+        '''
+        ciphertext_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_SIKEGetCiphertextSize(params, ctypes.byref(ciphertext_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEGetCiphertextSize() failed: {0}'.format(Retval.StrError(retval)))
+        shared_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_SIKEGetSharedKeySize(params, ctypes.byref(shared_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEGetSharedKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        ciphertext = ctypes.create_string_buffer(ciphertext_size.value)
+        shared = ctypes.create_string_buffer(shared_size.value)
+
+        retval = _iqr_toolkit.iqr_SIKEEncapsulate(pub, rng, ciphertext, ciphertext_size, shared, shared_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEEncapsulate() failed: {0}'.format(Retval.StrError(retval)))
+
+        return ciphertext.raw, shared.raw
+
+    @staticmethod
+    def Decapsulate(params, priv, ciphertext):
+        ''' Extract the shared key from a private key and ciphertext.
+        '''
+        shared_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_SIKEGetSharedKeySize(params, ctypes.byref(shared_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEGetSharedKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        shared = ctypes.create_string_buffer(shared_size.value)
+
+        retval = _iqr_toolkit.iqr_SIKEDecapsulate(priv, ciphertext, len(ciphertext), shared, shared_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SIKEDecapsulate() failed: {0}'.format(Retval.StrError(retval)))
+
+        return shared.raw
+
+
+def test_SIKE():
+    ''' Run a simple SIKE test.
+    '''
+    ctx = Context.Create()
+
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA3_256, Hash.IQR_HASH_DEFAULT_SHA3_256)
+
+    rng = Rng.CreateHMACDRBG(ctx, Hash.IQR_HASHALGO_SHA3_256)
+    Rng.Initialize(rng, b'this is really bad seed data, never do this')
+
+    params = SIKE.CreateParams(ctx, SIKE.IQR_SIKE_P434)
+    pub, priv = SIKE.CreateKeyPair(params, rng)
+
+    ciphertext, shared = SIKE.Encapsulate(params, pub, rng)
+    print('SIKE Encapsulate: {0} bytes'.format(len(shared)))
+    shared2 = SIKE.Decapsulate(params, priv, ciphertext)
+    print('SIKE Decapsulate: {0} bytes'.format(len(shared2)))
+
+    assert(shared == shared2)
+
+    pub_data = SIKE.ExportPublicKey(params, pub)
+    priv_data = SIKE.ExportPrivateKey(params, priv)
+
+    pub2 = SIKE.ImportPublicKey(params, pub_data)
+    priv2 = SIKE.ImportPrivateKey(params, priv_data)
+
+    SIKE.DestroyPublicKey(pub)
+    SIKE.DestroyPrivateKey(priv)
+    SIKE.DestroyPublicKey(pub2)
+    SIKE.DestroyPrivateKey(priv2)
+    SIKE.DestroyParams(params)
+
+    Rng.Destroy(rng)
+    Context.Destroy(ctx)
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------
 # Toolkit return values: iqr_version.h
 # ----------------------------------------------------------------------------------------------------------------------------------
 class Version:
@@ -1779,6 +2015,7 @@ if __name__ == '__main__':
     test_Kyber()
     test_NTRUPrime()
     test_Saber()
+    test_SIKE()
 
     # Signatures
     test_Dilithium()
