@@ -1472,6 +1472,244 @@ def test_rng():
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
+# Saber KEM: iqr_saber.h
+# ----------------------------------------------------------------------------------------------------------------------------------
+class Saber:
+    ''' Saber KEM.
+    '''
+
+    IQR_SABER_SHARED_KEY_SIZE = 32  # The size of the shared key produced by Saber in bytes.
+
+    IQR_LIGHT_SABER = _iqr_toolkit.IQR_LIGHT_SABER
+    IQR_SABER = _iqr_toolkit.IQR_SABER
+    IQR_FIRE_SABER = _iqr_toolkit.IQR_FIRE_SABER
+
+    # Type hints for calling into the C library.
+    _iqr_toolkit.iqr_SaberCreateParams.argtypes = [ctypes.c_void_p,  # Context
+                                                   ctypes.c_void_p,  # RNG
+                                                   ctypes.POINTER(ctypes.c_void_p)]  # params
+    _iqr_toolkit.iqr_SaberCreateParams.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SaberDestroyParams.argtypes = [ctypes.POINTER(ctypes.c_void_p)]  # params
+    _iqr_toolkit.iqr_SaberDestroyParams.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_SaberGetPublicKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_SaberGetPublicKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SaberGetPrivateKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_SaberGetPrivateKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SaberGetCiphertextSize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_SaberGetCiphertextSize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SaberGetSharedKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_SaberGetSharedKeySize.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_SaberCreateKeyPair.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
+                                                    ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SaberCreateKeyPair.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SaberDestroyPublicKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SaberDestroyPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SaberDestroyPrivateKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SaberDestroyPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SaberExportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_SaberExportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SaberExportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_SaberExportPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SaberImportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                      ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SaberImportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SaberImportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                       ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SaberImportPrivateKey.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_SaberEncapsulate.argtypes = [ctypes.c_void_p,  # Public Key
+                                                  ctypes.c_void_p,  # RNG
+                                                  ctypes.c_void_p, ctypes.c_size_t,  # Ciphertext
+                                                  ctypes.c_void_p, ctypes.c_size_t]  # Shared Key
+    _iqr_toolkit.iqr_SaberEncapsulate.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SaberDecapsulate.argtypes = [ctypes.c_void_p,  # Private Key
+                                                  ctypes.c_void_p, ctypes.c_size_t,  # Ciphertext
+                                                  ctypes.c_void_p, ctypes.c_size_t]  # Shared Key
+    _iqr_toolkit.iqr_SaberDecapsulate.restype = ctypes.c_int64
+
+    @staticmethod
+    def CreateParams(ctx, variant):
+        ''' Create a parameter object for the Saber cryptographic system.
+        '''
+        params = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_SaberCreateParams(ctx, variant, ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberCreateParams() failed: {0}'.format(Retval.StrError(retval)))
+
+        return params
+
+    @staticmethod
+    def DestroyParams(params):
+        ''' Clear and deallocate a Saber parameter object.
+        '''
+        retval = _iqr_toolkit.iqr_SaberDestroyParams(ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberDestroyParams() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def CreateKeyPair(params, rng):
+        pub_key = ctypes.c_void_p(0)
+        priv_key = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_SaberCreateKeyPair(params, rng, ctypes.byref(pub_key), ctypes.byref(priv_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberCreateKeyPair() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_key, priv_key
+
+    @staticmethod
+    def DestroyPublicKey(pub_key):
+        ''' Clear and deallocate a Saber public key object.
+        '''
+        retval = _iqr_toolkit.iqr_SaberDestroyPublicKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberDestroyPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def DestroyPrivateKey(pub_key):
+        ''' Clear and deallocate a Saber private object.
+        '''
+        retval = _iqr_toolkit.iqr_SaberDestroyPrivateKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberDestroyPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def ExportPublicKey(params, pub_key):
+        ''' Export a Saber public key object to bytes.
+        '''
+        pub_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_SaberGetPublicKeySize(params, ctypes.byref(pub_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberGetPublicKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        pub_data = ctypes.create_string_buffer(pub_size.value)
+
+        retval = _iqr_toolkit.iqr_SaberExportPublicKey(pub_key, pub_data, pub_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberExportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_data.raw
+
+    @staticmethod
+    def ExportPrivateKey(params, priv_key):
+        ''' Export a Saber private key object to bytes.
+        '''
+        priv_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_SaberGetPrivateKeySize(params, ctypes.byref(priv_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberGetPrivateKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        priv_data = ctypes.create_string_buffer(priv_size.value)
+
+        retval = _iqr_toolkit.iqr_SaberExportPrivateKey(priv_key, priv_data, priv_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberExportPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv_data.raw
+
+    @staticmethod
+    def ImportPublicKey(params, pub_data):
+        ''' Import a Saber public key from bytes.
+        '''
+        pub = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_SaberImportPublicKey(params, pub_data, len(pub_data), ctypes.byref(pub))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub
+
+    @staticmethod
+    def ImportPrivateKey(params, priv_data):
+        ''' Import a Saber private key from bytes.
+        '''
+        priv = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_SaberImportPrivateKey(params, priv_data, len(priv_data), ctypes.byref(priv))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv
+
+    @staticmethod
+    def Encapsulate(params, pub, rng):
+        ''' Create a ciphertext and shared key from the public key.
+        '''
+        ciphertext_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_SaberGetCiphertextSize(params, ctypes.byref(ciphertext_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberGetCiphertextSize() failed: {0}'.format(Retval.StrError(retval)))
+        shared_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_SaberGetSharedKeySize(params, ctypes.byref(shared_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberGetSharedKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        ciphertext = ctypes.create_string_buffer(ciphertext_size.value)
+        shared = ctypes.create_string_buffer(shared_size.value)
+
+        retval = _iqr_toolkit.iqr_SaberEncapsulate(pub, rng, ciphertext, ciphertext_size, shared, shared_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberEncapsulate() failed: {0}'.format(Retval.StrError(retval)))
+
+        return ciphertext.raw, shared.raw
+
+    @staticmethod
+    def Decapsulate(params, priv, ciphertext):
+        ''' Extract the shared key from a private key and ciphertext.
+        '''
+        shared_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_SaberGetSharedKeySize(params, ctypes.byref(shared_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberGetSharedKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        shared = ctypes.create_string_buffer(shared_size.value)
+
+        retval = _iqr_toolkit.iqr_SaberDecapsulate(priv, ciphertext, len(ciphertext), shared, shared_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SaberDecapsulate() failed: {0}'.format(Retval.StrError(retval)))
+
+        return shared.raw
+
+
+def test_Saber():
+    ''' Run a simple Saber test.
+    '''
+    ctx = Context.Create()
+
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA3_256, Hash.IQR_HASH_DEFAULT_SHA3_256)
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA3_512, Hash.IQR_HASH_DEFAULT_SHA3_512)
+
+    rng = Rng.CreateHMACDRBG(ctx, Hash.IQR_HASHALGO_SHA3_256)
+    Rng.Initialize(rng, b'this is really bad seed data, never do this')
+
+    params = Saber.CreateParams(ctx, Saber.IQR_LIGHT_SABER)
+    pub, priv = Saber.CreateKeyPair(params, rng)
+
+    ciphertext, shared = Saber.Encapsulate(params, pub, rng)
+    print('Saber Encapsulate: {0} bytes'.format(len(shared)))
+    shared2 = Saber.Decapsulate(params, priv, ciphertext)
+    print('Saber Decapsulate: {0} bytes'.format(len(shared2)))
+
+    assert(shared == shared2)
+
+    pub_data = Saber.ExportPublicKey(params, pub)
+    priv_data = Saber.ExportPrivateKey(params, priv)
+
+    pub2 = Saber.ImportPublicKey(params, pub_data)
+    priv2 = Saber.ImportPrivateKey(params, priv_data)
+
+    Saber.DestroyPublicKey(pub)
+    Saber.DestroyPrivateKey(priv)
+    Saber.DestroyPublicKey(pub2)
+    Saber.DestroyPrivateKey(priv2)
+    Saber.DestroyParams(params)
+
+    Rng.Destroy(rng)
+    Context.Destroy(ctx)
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------
 # Toolkit return values: iqr_version.h
 # ----------------------------------------------------------------------------------------------------------------------------------
 class Version:
@@ -1540,6 +1778,7 @@ if __name__ == '__main__':
     test_FrodoKEM()
     test_Kyber()
     test_NTRUPrime()
+    test_Saber()
 
     # Signatures
     test_Dilithium()
