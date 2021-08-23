@@ -1946,6 +1946,232 @@ def test_SIKE():
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
+# Toolkit SPHICS+ signatures: iqr_sphincs.h
+# ----------------------------------------------------------------------------------------------------------------------------------
+class SPHINCS:
+    ''' SPHINCS signature scheme.
+    '''
+
+    IQR_SPHINCS_SHA2_256_128F = _iqr_toolkit.IQR_SPHINCS_SHA2_256_128F  # Using SHA-256, fast variant with 128-bit security.
+    IQR_SPHINCS_SHA2_256_128S = _iqr_toolkit.IQR_SPHINCS_SHA2_256_128S  # using SHA-256, small variant with 128-bit security.
+    IQR_SPHINCS_SHAKE_256_128F = _iqr_toolkit.IQR_SPHINCS_SHAKE_256_128F  # using SHAKE-256, fast variant with 128-bit security.
+    IQR_SPHINCS_SHAKE_256_128S = _iqr_toolkit.IQR_SPHINCS_SHAKE_256_128S  # using SHAKE-256, small variant with 128-bit security.
+    IQR_SPHINCS_SHA2_256_192F = _iqr_toolkit.IQR_SPHINCS_SHA2_256_192F  # using SHA-256, fast variant with 192-bit security.
+    IQR_SPHINCS_SHA2_256_192S = _iqr_toolkit.IQR_SPHINCS_SHA2_256_192S  # using SHA-256, small variant with 192-bit security.
+    IQR_SPHINCS_SHAKE_256_192F = _iqr_toolkit.IQR_SPHINCS_SHAKE_256_192F  # using SHAKE-256, fast variant with 192-bit security.
+    IQR_SPHINCS_SHAKE_256_192S = _iqr_toolkit.IQR_SPHINCS_SHAKE_256_192S  # using SHAKE-256, small variant with 192-bit security.
+    IQR_SPHINCS_SHA2_256_256F = _iqr_toolkit.IQR_SPHINCS_SHA2_256_256F  # using SHA-256, fast variant with 256-bit security.
+    IQR_SPHINCS_SHA2_256_256S = _iqr_toolkit.IQR_SPHINCS_SHA2_256_256S  # using SHA-256, small variant with 256-bit security.
+    IQR_SPHINCS_SHAKE_256_256F = _iqr_toolkit.IQR_SPHINCS_SHAKE_256_256F  # using SHAKE-256, fast variant with 256-bit security.
+    IQR_SPHINCS_SHAKE_256_256S = _iqr_toolkit.IQR_SPHINCS_SHAKE_256_256S  # using SHAKE-256, small variant with 256-bit security.
+
+    # Type hints for calling into the C library.
+    _iqr_toolkit.iqr_SPHINCSCreateParams.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SPHINCSCreateParams.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SPHINCSDestroyParams.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SPHINCSDestroyParams.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_SPHINCSCreateKeyPair.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p),
+                                                      ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SPHINCSCreateKeyPair.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SPHINCSImportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                        ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SPHINCSImportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SPHINCSImportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                         ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SPHINCSImportPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SPHINCSExportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_SPHINCSExportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SPHINCSExportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_SPHINCSExportPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SPHINCSDestroyPublicKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SPHINCSDestroyPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SPHINCSDestroyPrivateKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_SPHINCSDestroyPrivateKey.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_SPHINCSGetPublicKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_SPHINCSGetPublicKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SPHINCSGetPrivateKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_SPHINCSGetPrivateKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SPHINCSGetSignatureSize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_SPHINCSGetSignatureSize.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_SPHINCSSign.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                             ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_SPHINCSSign.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_SPHINCSVerify.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                               ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_SPHINCSVerify.restype = ctypes.c_int64
+
+    @staticmethod
+    def CreateParams(ctx, variant):
+        ''' Create a parameter object for the SPHINCS cryptographic system.
+        '''
+        params = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_SPHINCSCreateParams(ctx, variant, ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SPHINCSCreateParams() failed: {0}'.format(Retval.StrError(retval)))
+
+        return params
+
+    @staticmethod
+    def DestroyParams(params):
+        ''' Clear and deallocate a SPHINCS parameter object.
+        '''
+        retval = _iqr_toolkit.iqr_SPHINCSDestroyParams(ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SPHINCSDestroyParams() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def CreateKeyPair(params, rng):
+        pub_key = ctypes.c_void_p(0)
+        priv_key = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_SPHINCSCreateKeyPair(params, rng, ctypes.byref(pub_key), ctypes.byref(priv_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SPHINCSCreateKeyPair() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_key, priv_key
+
+    @staticmethod
+    def DestroyPublicKey(pub_key):
+        ''' Clear and deallocate a SPHINCS public key object.
+        '''
+        retval = _iqr_toolkit.iqr_SPHINCSDestroyPublicKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SPHINCSDestroyPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def DestroyPrivateKey(pub_key):
+        ''' Clear and deallocate a SPHINCS private object.
+        '''
+        retval = _iqr_toolkit.iqr_SPHINCSDestroyPrivateKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SPHINCSDestroyPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def ExportPublicKey(params, pub_key):
+        ''' Export a SPHINCS public key object to bytes.
+        '''
+        pub_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_SPHINCSGetPublicKeySize(params, ctypes.byref(pub_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SPHINCSGetPublicKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        pub_data = ctypes.create_string_buffer(pub_size.value)
+
+        retval = _iqr_toolkit.iqr_SPHINCSExportPublicKey(pub_key, pub_data, pub_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SPHINCSExportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_data.raw
+
+    @staticmethod
+    def ExportPrivateKey(params, priv_key):
+        ''' Export a SPHINCS private key object to bytes.
+        '''
+        priv_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_SPHINCSGetPrivateKeySize(params, ctypes.byref(priv_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SPHINCSGetPrivateKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        priv_data = ctypes.create_string_buffer(priv_size.value)
+
+        retval = _iqr_toolkit.iqr_SPHINCSExportPrivateKey(priv_key, priv_data, priv_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SPHINCSExportPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv_data.raw
+
+    @staticmethod
+    def ImportPublicKey(params, pub_data):
+        ''' Import a SPHINCS public key from bytes.
+        '''
+        pub = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_SPHINCSImportPublicKey(params, pub_data, len(pub_data), ctypes.byref(pub))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SPHINCSImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub
+
+    @staticmethod
+    def ImportPrivateKey(params, priv_data):
+        ''' Import a SPHINCS private key from bytes.
+        '''
+        priv = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_SPHINCSImportPrivateKey(params, priv_data, len(priv_data), ctypes.byref(priv))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SPHINCSImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv
+
+    @staticmethod
+    def Sign(params, priv, rng, msg):
+        ''' Create a signature from the given private key and message.
+        '''
+        sig_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_SPHINCSGetSignatureSize(params, ctypes.byref(sig_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SPHINCSGetSignatureSize() failed: {0}'.format(Retval.StrError(retval)))
+
+        sig = ctypes.create_string_buffer(sig_size.value)
+
+        retval = _iqr_toolkit.iqr_SPHINCSSign(priv, rng, msg, len(msg), sig, sig_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_SPHINCSSign() failed: {0}'.format(Retval.StrError(retval)))
+
+        return sig.raw
+
+    @staticmethod
+    def Verify(pub, msg, sig):
+        ''' Verify a signature.
+        '''
+        retval = _iqr_toolkit.iqr_SPHINCSVerify(pub, msg, len(msg), sig, len(sig))
+        if retval == Retval.IQR_EINVSIGNATURE:
+            return False
+        elif retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceDecapsulate() failed: {0}'.format(Retval.StrError(retval)))
+
+        return True
+
+
+def test_SPHINCS():
+    ''' Run a simple SPHINCS test.
+    '''
+    ctx = Context.Create()
+
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA2_256, Hash.IQR_HASH_DEFAULT_SHA2_256)
+
+    rng = Rng.CreateHMACDRBG(ctx, Hash.IQR_HASHALGO_SHA2_256)
+    Rng.Initialize(rng, b'this is really bad seed data, never do this')
+
+    params = SPHINCS.CreateParams(ctx, SPHINCS.IQR_SPHINCS_SHA2_256_128F)
+    pub, priv = SPHINCS.CreateKeyPair(params, rng)
+
+    msg = b'This is a short message for signing.'
+    sig = SPHINCS.Sign(params, priv, rng, msg)
+    print('SPHINCS signature: {0} bytes'.format(len(sig)))
+    valid = SPHINCS.Verify(pub, msg, sig)
+    print('           verified: {0}'.format(valid))
+
+    pub_data = SPHINCS.ExportPublicKey(params, pub)
+    priv_data = SPHINCS.ExportPrivateKey(params, priv)
+
+    pub2 = SPHINCS.ImportPublicKey(params, pub_data)
+    priv2 = SPHINCS.ImportPrivateKey(params, priv_data)
+
+    SPHINCS.DestroyPublicKey(pub)
+    SPHINCS.DestroyPrivateKey(priv)
+    SPHINCS.DestroyPublicKey(pub2)
+    SPHINCS.DestroyPrivateKey(priv2)
+    SPHINCS.DestroyParams(params)
+
+    Rng.Destroy(rng)
+    Context.Destroy(ctx)
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------
 # Toolkit return values: iqr_version.h
 # ----------------------------------------------------------------------------------------------------------------------------------
 class Version:
@@ -2019,3 +2245,5 @@ if __name__ == '__main__':
 
     # Signatures
     test_Dilithium()
+    test_SPHINCS()
+
