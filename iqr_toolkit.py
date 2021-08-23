@@ -876,7 +876,7 @@ def test_hash():
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
-# Kyber KEM: iqr_classicmceliece.h
+# Kyber KEM: iqr_kyber.h
 # ----------------------------------------------------------------------------------------------------------------------------------
 class Kyber:
     ''' Kyber KEM.
@@ -1112,6 +1112,246 @@ def test_Kyber():
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
+# NTRUPrime KEM: iqr_ntruprime.h
+# ----------------------------------------------------------------------------------------------------------------------------------
+class NTRUPrime:
+    ''' NTRUPrime Prime KEM.
+    '''
+
+    IQR_NTRUPRIME_SHARED_KEY_SIZE = 32  # The size of the shared key produced by NTRUPrime in bytes.
+
+    IQR_SNTRUP_653 = _iqr_toolkit.IQR_SNTRUP_653  # NIST category 1 variant.
+    IQR_SNTRUP_761 = _iqr_toolkit.IQR_SNTRUP_761  # NIST category 2 variant.
+    IQR_SNTRUP_857 = _iqr_toolkit.IQR_SNTRUP_857  # NIST category 2-3 variant.
+    IQR_SNTRUP_953 = _iqr_toolkit.IQR_SNTRUP_953  # NIST category 3-4 variant.
+    IQR_SNTRUP_1013 = _iqr_toolkit.IQR_SNTRUP_1013  # NIST category 4 variant.
+    IQR_SNTRUP_1277 = _iqr_toolkit.IQR_SNTRUP_1277  # NIST category 5 variant.
+
+    # Type hints for calling into the C library.
+    _iqr_toolkit.iqr_NTRUPrimeCreateParams.argtypes = [ctypes.c_void_p,  # Context
+                                                       ctypes.c_void_p,  # RNG
+                                                       ctypes.POINTER(ctypes.c_void_p)]  # params
+    _iqr_toolkit.iqr_NTRUPrimeCreateParams.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_NTRUPrimeDestroyParams.argtypes = [ctypes.POINTER(ctypes.c_void_p)]  # params
+    _iqr_toolkit.iqr_NTRUPrimeDestroyParams.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_NTRUPrimeGetPublicKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_NTRUPrimeGetPublicKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_NTRUPrimeGetPrivateKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_NTRUPrimeGetPrivateKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_NTRUPrimeGetCiphertextSize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_NTRUPrimeGetCiphertextSize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_NTRUPrimeGetSharedKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_NTRUPrimeGetSharedKeySize.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_NTRUPrimeCreateKeyPair.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
+                                                        ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_NTRUPrimeCreateKeyPair.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_NTRUPrimeDestroyPublicKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_NTRUPrimeDestroyPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_NTRUPrimeDestroyPrivateKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_NTRUPrimeDestroyPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_NTRUPrimeExportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_NTRUPrimeExportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_NTRUPrimeExportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_NTRUPrimeExportPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_NTRUPrimeImportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                          ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_NTRUPrimeImportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_NTRUPrimeImportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                           ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_NTRUPrimeImportPrivateKey.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_NTRUPrimeEncapsulate.argtypes = [ctypes.c_void_p,  # Public Key
+                                                      ctypes.c_void_p,  # RNG
+                                                      ctypes.c_void_p, ctypes.c_size_t,  # Ciphertext
+                                                      ctypes.c_void_p, ctypes.c_size_t]  # Shared Key
+    _iqr_toolkit.iqr_NTRUPrimeEncapsulate.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_NTRUPrimeDecapsulate.argtypes = [ctypes.c_void_p,  # Private Key
+                                                      ctypes.c_void_p, ctypes.c_size_t,  # Ciphertext
+                                                      ctypes.c_void_p, ctypes.c_size_t]  # Shared Key
+    _iqr_toolkit.iqr_NTRUPrimeDecapsulate.restype = ctypes.c_int64
+
+    @staticmethod
+    def CreateParams(ctx, variant):
+        ''' Create a parameter object for the NTRUPrime cryptographic system.
+        '''
+        params = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_NTRUPrimeCreateParams(ctx, variant, ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeCreateParams() failed: {0}'.format(Retval.StrError(retval)))
+
+        return params
+
+    @staticmethod
+    def DestroyParams(params):
+        ''' Clear and deallocate a NTRUPrime parameter object.
+        '''
+        retval = _iqr_toolkit.iqr_NTRUPrimeDestroyParams(ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeDestroyParams() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def CreateKeyPair(params, rng):
+        pub_key = ctypes.c_void_p(0)
+        priv_key = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_NTRUPrimeCreateKeyPair(params, rng, ctypes.byref(pub_key), ctypes.byref(priv_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeCreateKeyPair() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_key, priv_key
+
+    @staticmethod
+    def DestroyPublicKey(pub_key):
+        ''' Clear and deallocate a NTRUPrime public key object.
+        '''
+        retval = _iqr_toolkit.iqr_NTRUPrimeDestroyPublicKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeDestroyPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def DestroyPrivateKey(pub_key):
+        ''' Clear and deallocate a NTRUPrime private object.
+        '''
+        retval = _iqr_toolkit.iqr_NTRUPrimeDestroyPrivateKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeDestroyPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def ExportPublicKey(params, pub_key):
+        ''' Export a NTRUPrime public key object to bytes.
+        '''
+        pub_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_NTRUPrimeGetPublicKeySize(params, ctypes.byref(pub_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeGetPublicKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        pub_data = ctypes.create_string_buffer(pub_size.value)
+
+        retval = _iqr_toolkit.iqr_NTRUPrimeExportPublicKey(pub_key, pub_data, pub_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeExportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_data.raw
+
+    @staticmethod
+    def ExportPrivateKey(params, priv_key):
+        ''' Export a NTRUPrime private key object to bytes.
+        '''
+        priv_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_NTRUPrimeGetPrivateKeySize(params, ctypes.byref(priv_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeGetPrivateKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        priv_data = ctypes.create_string_buffer(priv_size.value)
+
+        retval = _iqr_toolkit.iqr_NTRUPrimeExportPrivateKey(priv_key, priv_data, priv_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeExportPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv_data.raw
+
+    @staticmethod
+    def ImportPublicKey(params, pub_data):
+        ''' Import a NTRUPrime public key from bytes.
+        '''
+        pub = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_NTRUPrimeImportPublicKey(params, pub_data, len(pub_data), ctypes.byref(pub))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub
+
+    @staticmethod
+    def ImportPrivateKey(params, priv_data):
+        ''' Import a NTRUPrime private key from bytes.
+        '''
+        priv = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_NTRUPrimeImportPrivateKey(params, priv_data, len(priv_data), ctypes.byref(priv))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv
+
+    @staticmethod
+    def Encapsulate(params, pub, rng):
+        ''' Create a ciphertext and shared key from the public key.
+        '''
+        ciphertext_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_NTRUPrimeGetCiphertextSize(params, ctypes.byref(ciphertext_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeGetCiphertextSize() failed: {0}'.format(Retval.StrError(retval)))
+        shared_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_NTRUPrimeGetSharedKeySize(params, ctypes.byref(shared_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeGetSharedKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        ciphertext = ctypes.create_string_buffer(ciphertext_size.value)
+        shared = ctypes.create_string_buffer(shared_size.value)
+
+        retval = _iqr_toolkit.iqr_NTRUPrimeEncapsulate(pub, rng, ciphertext, ciphertext_size, shared, shared_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeEncapsulate() failed: {0}'.format(Retval.StrError(retval)))
+
+        return ciphertext.raw, shared.raw
+
+    @staticmethod
+    def Decapsulate(params, priv, ciphertext):
+        ''' Extract the shared key from a private key and ciphertext.
+        '''
+        shared_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_NTRUPrimeGetSharedKeySize(params, ctypes.byref(shared_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeGetSharedKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        shared = ctypes.create_string_buffer(shared_size.value)
+
+        retval = _iqr_toolkit.iqr_NTRUPrimeDecapsulate(priv, ciphertext, len(ciphertext), shared, shared_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_NTRUPrimeDecapsulate() failed: {0}'.format(Retval.StrError(retval)))
+
+        return shared.raw
+
+
+def test_NTRUPrime():
+    ''' Run a simple NTRUPrime test.
+    '''
+    ctx = Context.Create()
+
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA2_512, Hash.IQR_HASH_DEFAULT_SHA2_512)
+
+    rng = Rng.CreateHMACDRBG(ctx, Hash.IQR_HASHALGO_SHA2_512)
+    Rng.Initialize(rng, b'this is really bad seed data, never do this')
+
+    params = NTRUPrime.CreateParams(ctx, NTRUPrime.IQR_SNTRUP_653)
+    pub, priv = NTRUPrime.CreateKeyPair(params, rng)
+
+    ciphertext, shared = NTRUPrime.Encapsulate(params, pub, rng)
+    print('NTRUPrime Encapsulate: {0} bytes'.format(len(shared)))
+    shared2 = NTRUPrime.Decapsulate(params, priv, ciphertext)
+    print('NTRUPrime Decapsulate: {0} bytes'.format(len(shared2)))
+
+    assert(shared == shared2)
+
+    pub_data = NTRUPrime.ExportPublicKey(params, pub)
+    priv_data = NTRUPrime.ExportPrivateKey(params, priv)
+
+    pub2 = NTRUPrime.ImportPublicKey(params, pub_data)
+    priv2 = NTRUPrime.ImportPrivateKey(params, priv_data)
+
+    NTRUPrime.DestroyPublicKey(pub)
+    NTRUPrime.DestroyPrivateKey(priv)
+    NTRUPrime.DestroyPublicKey(pub2)
+    NTRUPrime.DestroyPrivateKey(priv2)
+    NTRUPrime.DestroyParams(params)
+
+    Rng.Destroy(rng)
+    Context.Destroy(ctx)
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------
 # Toolkit return values: iqr_retval.h
 # ----------------------------------------------------------------------------------------------------------------------------------
 class Retval:
@@ -1299,6 +1539,7 @@ if __name__ == '__main__':
     test_ClassicMcEliece()
     test_FrodoKEM()
     test_Kyber()
+    test_NTRUPrime()
 
     # Signatures
     test_Dilithium()
