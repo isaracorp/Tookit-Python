@@ -418,6 +418,173 @@ class Dilithium:
                                                  ctypes.c_void_p, ctypes.c_size_t]
     _iqr_toolkit.iqr_DilithiumVerify.restype = ctypes.c_int64
 
+    @staticmethod
+    def CreateParams(ctx, variant):
+        ''' Create a parameter object for the Dilithium cryptographic system.
+        '''
+        params = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_DilithiumCreateParams(ctx, variant, ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DilithiumCreateParams() failed: {0}'.format(Retval.StrError(retval)))
+
+        return params
+
+    @staticmethod
+    def DestroyParams(params):
+        ''' Clear and deallocate a Dilithium parameter object.
+        '''
+        retval = _iqr_toolkit.iqr_DilithiumDestroyParams(ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DilithiumDestroyParams() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def CreateKeyPair(params, rng):
+        pub_key = ctypes.c_void_p(0)
+        priv_key = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_DilithiumCreateKeyPair(params, rng, ctypes.byref(pub_key), ctypes.byref(priv_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DilithiumCreateKeyPair() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_key, priv_key
+
+    @staticmethod
+    def DestroyPublicKey(pub_key):
+        ''' Clear and deallocate a Dilithium public key object.
+        '''
+        retval = _iqr_toolkit.iqr_DilithiumDestroyPublicKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DilithiumDestroyPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def DestroyPrivateKey(pub_key):
+        ''' Clear and deallocate a Dilithium private object.
+        '''
+        retval = _iqr_toolkit.iqr_DilithiumDestroyPrivateKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DilithiumDestroyPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def ExportPublicKey(params, pub_key):
+        ''' Export a Dilithium public key object to bytes.
+        '''
+        pub_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_DilithiumGetPublicKeySize(params, ctypes.byref(pub_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DilithiumGetPublicKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        pub_data = ctypes.create_string_buffer(pub_size.value)
+
+        retval = _iqr_toolkit.iqr_DilithiumExportPublicKey(pub_key, pub_data, pub_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DilithiumExportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_data.raw
+
+    @staticmethod
+    def ExportPrivateKey(params, priv_key):
+        ''' Export a Dilithium private key object to bytes.
+        '''
+        priv_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_DilithiumGetPrivateKeySize(params, ctypes.byref(priv_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DilithiumGetPrivateKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        priv_data = ctypes.create_string_buffer(priv_size.value)
+
+        retval = _iqr_toolkit.iqr_DilithiumExportPrivateKey(priv_key, priv_data, priv_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DilithiumExportPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv_data.raw
+
+    @staticmethod
+    def ImportPublicKey(params, pub_data):
+        ''' Import a Dilithium public key from bytes.
+        '''
+        pub = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_DilithiumImportPublicKey(params, pub_data, len(pub_data), ctypes.byref(pub))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DilithiumImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub
+
+    @staticmethod
+    def ImportPrivateKey(params, priv_data):
+        ''' Import a Dilithium private key from bytes.
+        '''
+        priv = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_DilithiumImportPrivateKey(params, priv_data, len(priv_data), ctypes.byref(priv))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DilithiumImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv
+
+    @staticmethod
+    def Sign(params, priv, msg):
+        ''' Create a signature from the given private key and message.
+        '''
+        sig_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_DilithiumGetSignatureSize(params, ctypes.byref(sig_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DilithiumGetSignatureSize() failed: {0}'.format(Retval.StrError(retval)))
+
+        sig = ctypes.create_string_buffer(sig_size.value)
+
+        retval = _iqr_toolkit.iqr_DilithiumSign(priv, msg, len(msg), sig, sig_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_DilithiumSign() failed: {0}'.format(Retval.StrError(retval)))
+
+        return sig.raw
+
+    @staticmethod
+    def Verify(pub, msg, sig):
+        ''' Verify a signature.
+        '''
+        retval = _iqr_toolkit.iqr_DilithiumVerify(pub, msg, len(msg), sig, len(sig))
+        if retval == Retval.IQR_EINVSIGNATURE:
+            return False
+        elif retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_ClassicMcElieceDecapsulate() failed: {0}'.format(Retval.StrError(retval)))
+
+        return True
+
+
+def test_dilithium():
+    ''' Run a simple Dilithium test.
+    '''
+    ctx = Context.Create()
+
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA2_256, Hash.IQR_HASH_DEFAULT_SHA2_256)
+
+    rng = Rng.CreateHMACDRBG(ctx, Hash.IQR_HASHALGO_SHA2_256)
+    Rng.Initialize(rng, b'this is really bad seed data, never do this')
+
+    params = Dilithium.CreateParams(ctx, Dilithium.IQR_DILITHIUM_2)
+    pub, priv = Dilithium.CreateKeyPair(params, rng)
+
+    msg = b'This is a short message for signing.'
+    sig = Dilithium.Sign(params, priv, msg)
+    print('Dilithium signature: {0} bytes'.format(len(sig)))
+    valid = Dilithium.Verify(pub, msg, sig)
+    print('           verified: {0}'.format(valid))
+
+    pub_data = Dilithium.ExportPublicKey(params, pub)
+    priv_data = Dilithium.ExportPrivateKey(params, priv)
+
+    pub2 = Dilithium.ImportPublicKey(params, pub_data)
+    priv2 = Dilithium.ImportPrivateKey(params, priv_data)
+
+    Dilithium.DestroyPublicKey(pub)
+    Dilithium.DestroyPrivateKey(priv)
+    Dilithium.DestroyPublicKey(pub2)
+    Dilithium.DestroyPrivateKey(priv2)
+    Dilithium.DestroyParams(params)
+
+    Rng.Destroy(rng)
+    Context.Destroy(ctx)
+
 
 # ----------------------------------------------------------------------------------------------------------------------------------
 # Toolkit hash implementations: iqr_hash.h
@@ -657,3 +824,4 @@ if __name__ == '__main__':
 
     # KEMs
     test_classicmceliece()
+    test_dilithium()
