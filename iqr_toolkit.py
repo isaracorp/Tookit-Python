@@ -333,7 +333,7 @@ class ClassicMcEliece:
         return shared.raw
 
 
-def test_classicmceliece():
+def test_ClassicMcEliece():
     ''' Run a simple ClassicMcEliece test.
     '''
     ctx = Context.Create()
@@ -347,9 +347,9 @@ def test_classicmceliece():
     pub, priv = ClassicMcEliece.CreateKeyPair(params, rng)
 
     ciphertext, shared = ClassicMcEliece.Encapsulate(params, pub, rng)
-    print('ClassicMcEliece Encapsulate: {0}'.format(shared))
+    print('ClassicMcEliece Encapsulate: {0} bytes'.format(len(shared)))
     shared2 = ClassicMcEliece.Decapsulate(params, priv, ciphertext)
-    print('ClassicMcEliece Decapsulate: {0}'.format(shared2))
+    print('ClassicMcEliece Decapsulate: {0} bytes'.format(len(shared2)))
 
     assert(shared == shared2)
 
@@ -551,7 +551,7 @@ class Dilithium:
         return True
 
 
-def test_dilithium():
+def test_Dilithium():
     ''' Run a simple Dilithium test.
     '''
     ctx = Context.Create()
@@ -581,6 +581,243 @@ def test_dilithium():
     Dilithium.DestroyPublicKey(pub2)
     Dilithium.DestroyPrivateKey(priv2)
     Dilithium.DestroyParams(params)
+
+    Rng.Destroy(rng)
+    Context.Destroy(ctx)
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------
+# Frodo KEM: iqr_frodokem.h
+# ----------------------------------------------------------------------------------------------------------------------------------
+class Frodo:
+    ''' Frodo KEM.
+    '''
+    IQR_FRODOKEM_640_AES = _iqr_toolkit.IQR_FRODOKEM_640_AES  # FrodoKEM using AES, variant with 104 bit quantum security.
+    IQR_FRODOKEM_640_SHAKE = _iqr_toolkit.IQR_FRODOKEM_640_SHAKE  # FrodoKEM using SHAKE, variant with 104 bit quantum security.
+    IQR_FRODOKEM_976_AES = _iqr_toolkit.IQR_FRODOKEM_976_AES  # FrodoKEM using AES, variant with 150 bit quantum security.
+    IQR_FRODOKEM_976_SHAKE = _iqr_toolkit.IQR_FRODOKEM_976_SHAKE  # FrodoKEM using SHAKE, variant with 150 bit quantum security.
+    IQR_FRODOKEM_1344_AES = _iqr_toolkit.IQR_FRODOKEM_1344_AES  # FrodoKEM using AES, variant with 197 bit quantum security.
+    IQR_FRODOKEM_1344_SHAKE = _iqr_toolkit.IQR_FRODOKEM_1344_SHAKE  # FrodoKEM using SHAKE, variant with 197 bit quantum security.
+
+    # Type hints for calling into the C library.
+    _iqr_toolkit.iqr_FrodoKEMCreateParams.argtypes = [ctypes.c_void_p,  # Context
+                                                      ctypes.c_void_p,  # RNG
+                                                      ctypes.POINTER(ctypes.c_void_p)]  # params
+    _iqr_toolkit.iqr_FrodoKEMCreateParams.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_FrodoKEMDestroyParams.argtypes = [ctypes.POINTER(ctypes.c_void_p)]  # params
+    _iqr_toolkit.iqr_FrodoKEMDestroyParams.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_FrodoKEMGetPublicKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_FrodoKEMGetPublicKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_FrodoKEMGetPrivateKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_FrodoKEMGetPrivateKeySize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_FrodoKEMGetCiphertextSize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_FrodoKEMGetCiphertextSize.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_FrodoKEMGetSharedKeySize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    _iqr_toolkit.iqr_FrodoKEMGetSharedKeySize.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_FrodoKEMCreateKeyPair.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
+                                                       ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_FrodoKEMCreateKeyPair.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_FrodoKEMDestroyPublicKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_FrodoKEMDestroyPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_FrodoKEMDestroyPrivateKey.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_FrodoKEMDestroyPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_FrodoKEMExportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_FrodoKEMExportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_FrodoKEMExportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    _iqr_toolkit.iqr_FrodoKEMExportPrivateKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_FrodoKEMImportPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                         ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_FrodoKEMImportPublicKey.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_FrodoKEMImportPrivateKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                                          ctypes.POINTER(ctypes.c_void_p)]
+    _iqr_toolkit.iqr_FrodoKEMImportPrivateKey.restype = ctypes.c_int64
+
+    _iqr_toolkit.iqr_FrodoKEMEncapsulate.argtypes = [ctypes.c_void_p,  # Public Key
+                                                     ctypes.c_void_p,  # RNG
+                                                     ctypes.c_void_p, ctypes.c_size_t,  # Ciphertext
+                                                     ctypes.c_void_p, ctypes.c_size_t]  # Shared Key
+    _iqr_toolkit.iqr_FrodoKEMEncapsulate.restype = ctypes.c_int64
+    _iqr_toolkit.iqr_FrodoKEMDecapsulate.argtypes = [ctypes.c_void_p,  # Private Key
+                                                     ctypes.c_void_p, ctypes.c_size_t,  # Ciphertext
+                                                     ctypes.c_void_p, ctypes.c_size_t]  # Shared Key
+    _iqr_toolkit.iqr_FrodoKEMDecapsulate.restype = ctypes.c_int64
+
+    @staticmethod
+    def CreateParams(ctx, variant):
+        ''' Create a parameter object for the FrodoKEM cryptographic system.
+        '''
+        params = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_FrodoKEMCreateParams(ctx, variant, ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMCreateParams() failed: {0}'.format(Retval.StrError(retval)))
+
+        return params
+
+    @staticmethod
+    def DestroyParams(params):
+        ''' Clear and deallocate a FrodoKEM parameter object.
+        '''
+        retval = _iqr_toolkit.iqr_FrodoKEMDestroyParams(ctypes.byref(params))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMDestroyParams() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def CreateKeyPair(params, rng):
+        pub_key = ctypes.c_void_p(0)
+        priv_key = ctypes.c_void_p(0)
+
+        retval = _iqr_toolkit.iqr_FrodoKEMCreateKeyPair(params, rng, ctypes.byref(pub_key), ctypes.byref(priv_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMCreateKeyPair() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_key, priv_key
+
+    @staticmethod
+    def DestroyPublicKey(pub_key):
+        ''' Clear and deallocate a FrodoKEM public key object.
+        '''
+        retval = _iqr_toolkit.iqr_FrodoKEMDestroyPublicKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMDestroyPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def DestroyPrivateKey(pub_key):
+        ''' Clear and deallocate a FrodoKEM private object.
+        '''
+        retval = _iqr_toolkit.iqr_FrodoKEMDestroyPrivateKey(ctypes.byref(pub_key))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMDestroyPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+    @staticmethod
+    def ExportPublicKey(params, pub_key):
+        ''' Export a FrodoKEM public key object to bytes.
+        '''
+        pub_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_FrodoKEMGetPublicKeySize(params, ctypes.byref(pub_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMGetPublicKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        pub_data = ctypes.create_string_buffer(pub_size.value)
+
+        retval = _iqr_toolkit.iqr_FrodoKEMExportPublicKey(pub_key, pub_data, pub_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMExportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub_data.raw
+
+    @staticmethod
+    def ExportPrivateKey(params, priv_key):
+        ''' Export a FrodoKEM private key object to bytes.
+        '''
+        priv_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_FrodoKEMGetPrivateKeySize(params, ctypes.byref(priv_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMGetPrivateKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        priv_data = ctypes.create_string_buffer(priv_size.value)
+
+        retval = _iqr_toolkit.iqr_FrodoKEMExportPrivateKey(priv_key, priv_data, priv_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMExportPrivateKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv_data.raw
+
+    @staticmethod
+    def ImportPublicKey(params, pub_data):
+        ''' Import a FrodoKEM public key from bytes.
+        '''
+        pub = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_FrodoKEMImportPublicKey(params, pub_data, len(pub_data), ctypes.byref(pub))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return pub
+
+    @staticmethod
+    def ImportPrivateKey(params, priv_data):
+        ''' Import a FrodoKEM private key from bytes.
+        '''
+        priv = ctypes.c_void_p(0)
+        retval = _iqr_toolkit.iqr_FrodoKEMImportPrivateKey(params, priv_data, len(priv_data), ctypes.byref(priv))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMImportPublicKey() failed: {0}'.format(Retval.StrError(retval)))
+
+        return priv
+
+    @staticmethod
+    def Encapsulate(params, pub, rng):
+        ''' Create a ciphertext and shared key from the public key.
+        '''
+        ciphertext_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_FrodoKEMGetCiphertextSize(params, ctypes.byref(ciphertext_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMGetCiphertextSize() failed: {0}'.format(Retval.StrError(retval)))
+        shared_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_FrodoKEMGetSharedKeySize(params, ctypes.byref(shared_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMGetSharedKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        ciphertext = ctypes.create_string_buffer(ciphertext_size.value)
+        shared = ctypes.create_string_buffer(shared_size.value)
+
+        retval = _iqr_toolkit.iqr_FrodoKEMEncapsulate(pub, rng, ciphertext, ciphertext_size, shared, shared_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMEncapsulate() failed: {0}'.format(Retval.StrError(retval)))
+
+        return ciphertext.raw, shared.raw
+
+    @staticmethod
+    def Decapsulate(params, priv, ciphertext):
+        ''' Extract the shared key from a private key and ciphertext.
+        '''
+        shared_size = ctypes.c_size_t(0)
+        retval = _iqr_toolkit.iqr_FrodoKEMGetSharedKeySize(params, ctypes.byref(shared_size))
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMGetSharedKeySize() failed: {0}'.format(Retval.StrError(retval)))
+
+        shared = ctypes.create_string_buffer(shared_size.value)
+
+        retval = _iqr_toolkit.iqr_FrodoKEMDecapsulate(priv, ciphertext, len(ciphertext), shared, shared_size)
+        if retval != Retval.IQR_OK:
+            raise RuntimeError('iqr_FrodoKEMDecapsulate() failed: {0}'.format(Retval.StrError(retval)))
+
+        return shared.raw
+
+
+def test_FrodoKEM():
+    ''' Run a simple FrodoKEM test.
+    '''
+    ctx = Context.Create()
+
+    Hash.RegisterCallbacks(ctx, Hash.IQR_HASHALGO_SHA2_256, Hash.IQR_HASH_DEFAULT_SHA2_256)
+
+    rng = Rng.CreateHMACDRBG(ctx, Hash.IQR_HASHALGO_SHA2_256)
+    Rng.Initialize(rng, b'this is really bad seed data, never do this')
+
+    params = Frodo.CreateParams(ctx, Frodo.IQR_FRODOKEM_640_AES)
+    pub, priv = Frodo.CreateKeyPair(params, rng)
+
+    ciphertext, shared = Frodo.Encapsulate(params, pub, rng)
+    print('Frodo Encapsulate: {0} bytes'.format(len(shared)))
+    shared2 = Frodo.Decapsulate(params, priv, ciphertext)
+    print('Frodo Decapsulate: {0} bytes'.format(len(shared2)))
+
+    assert(shared == shared2)
+
+    pub_data = Frodo.ExportPublicKey(params, pub)
+    priv_data = Frodo.ExportPrivateKey(params, priv)
+
+    pub2 = Frodo.ImportPublicKey(params, pub_data)
+    priv2 = Frodo.ImportPrivateKey(params, priv_data)
+
+    Frodo.DestroyPublicKey(pub)
+    Frodo.DestroyPrivateKey(priv)
+    Frodo.DestroyPublicKey(pub2)
+    Frodo.DestroyPrivateKey(priv2)
+    Frodo.DestroyParams(params)
 
     Rng.Destroy(rng)
     Context.Destroy(ctx)
@@ -823,5 +1060,8 @@ if __name__ == '__main__':
     test_rng()
 
     # KEMs
-    test_classicmceliece()
-    test_dilithium()
+    test_ClassicMcEliece()
+    test_FrodoKEM()
+
+    # Signatures
+    test_Dilithium()
