@@ -2246,4 +2246,3 @@ if __name__ == '__main__':
     # Signatures
     test_Dilithium()
     test_SPHINCS()
-
